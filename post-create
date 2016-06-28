@@ -7,7 +7,7 @@ set_global_cert() {
 
   if [[ -f /var/lib/dokku/config/global-cert/ssl.crt ]] && [[ -f /var/lib/dokku/config/global-cert/ssl.key ]]; then
     # we should export certs_set as a function in the certs plugin so that this works with the remote cli...
-    dokku certs:set $APP /var/lib/dokku/config/global-cert/ssl.crt /var/lib/dokku/config/global-cert/ssl.key
+    dokku certs:add $APP /var/lib/dokku/config/global-cert/ssl.crt /var/lib/dokku/config/global-cert/ssl.key
   fi
 }
 
