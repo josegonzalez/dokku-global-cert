@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set_global_cert() {
+  declare desc="sets global certs for an app"
+  local APP="$1"
+  [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+
+  if [[ -f /var/lib/dokku/config/global-cert/ssl.crt ]] && [[ -f /var/lib/dokku/config/global-cert/ssl.key ]]; then
+    # we should export certs_set as a function in the certs plugin so that this works with the remote cli...
+    dokku certs:set $APP /var/lib/dokku/config/global-cert/ssl.crt /var/lib/dokku/config/global-cert/ssl.key
+  fi
+}
+
+set_global_cert "$@"
