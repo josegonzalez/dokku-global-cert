@@ -11,7 +11,7 @@ Allow setting a global certificate for dokku applications.
 
 ```shell
 # on 0.5.x
-dokku plugin:install https://github.com/dokku/dokku-global-cert.git  global-cert
+dokku plugin:install https://github.com/josegonzalez/dokku-global-cert.git  global-cert
 ```
 
 ## usage
