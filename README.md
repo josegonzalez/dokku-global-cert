@@ -21,8 +21,8 @@ dokku plugin:install https://github.com/josegonzalez/dokku-global-cert.git  glob
 mkdir -p /var/lib/dokku/config/global-cert/
 
 # now copy your cert and key into this directory
-cp ssl.crt /var/lib/dokku/config/global-cert/ssl.crt
-cp ssl.key /var/lib/dokku/config/global-cert/ssl.key
+cp server.crt /var/lib/dokku/config/global-cert/server.crt
+cp server.key /var/lib/dokku/config/global-cert/server.key
 
 # and now all applications being deployed will have
 # the global certificate automatically set
