@@ -33,6 +33,11 @@ While Dokku supports per-application SSL certificates, it does not natively prov
 The `global-cert:set` command can be used to push a `tar` containing a certificate `.crt` and `.key` file to a single application. The command should correctly handle cases where the `.crt` and `.key` are not named properly or are nested in a subdirectory of said `tar` file. You can import it as follows:
 
 ```shell
+# if your `.crt` file came alongside a `.ca-bundle`, you'll want to 
+# concatenate those into a single `.crt` file before adding it to the `.tar`.
+cat yourdomain_com.crt yourdomain_com.ca-bundle > server.crt
+
+# tar the certificates
 tar cvf cert-key.tar server.crt server.key
 dokku global-cert:set < cert-key.tar
 ```
@@ -41,12 +46,6 @@ You can also import certs without using `stdin`, and instead specifying a full p
 
 ```shell
 dokku global-cert:set server.crt server.key
-```
-
-> Note: If your `.crt` file came alongside a `.ca-bundle`, you'll want to concatenate those into a single `.crt` file before adding it to the `.tar`.
-
-```shell
-cat yourdomain_com.crt yourdomain_com.ca-bundle > server.crt
 ```
 
 ### certificate removal
