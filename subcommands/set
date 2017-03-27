@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")" )" && pwd)/config"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+cmd-global-cert-set() {
+  declare desc="imports an SSL cert/key combo either on STDIN via a tarball or from specified cert/key filenames"
+  local cmd="$PLUGIN_COMMAND_PREFIX:set"
+  local CRT_FILE="$2"; local KEY_FILE="$3";
+
+  if fn-is-file-import "$CRT_FILE" "$KEY_FILE"; then
+    # importing from file
+    true
+  elif fn-is-tar-import; then
+    local CERTS_SET_TMP_WORK_DIR=$(mktemp -d "/tmp/dokku_certs_set.XXXX")
+    pushd "$CERTS_SET_TMP_WORK_DIR" &> /dev/null
+    trap 'popd &> /dev/null || true; rm -rf $CERTS_SET_TMP_WORK_DIR > /dev/null' RETURN
+    tar xvf - <&0
+
+    local CRT_FILE_SEARCH=$(find . -not -path '*/\.*' -type f | grep ".crt$")
+    local CRT_FILE_COUNT=$(printf "%s" "$CRT_FILE_SEARCH" | grep -c '^')
+    if [[ $CRT_FILE_COUNT -lt 1 ]]; then
+      dokku_log_fail "Tar archive is missing .crt file"
+    elif [[ $CRT_FILE_COUNT -gt 1 ]]; then
+      dokku_log_fail "Tar archive contains more than one .crt file"
+    else
+      local CRT_FILE=$CRT_FILE_SEARCH
+    fi
+
+    local KEY_FILE_SEARCH=$(find . -not -path '*/\.*' -type f | grep ".key$")
+    local KEY_FILE_COUNT=$(printf "%s" "$KEY_FILE_SEARCH" | grep -c '^')
+    if [[ $KEY_FILE_COUNT -lt 1 ]]; then
+      dokku_log_fail "Tar archive is missing .key file"
+    elif [[ $KEY_FILE_COUNT -gt 1 ]]; then
+      dokku_log_fail "Tar archive contains more than one .key file"
+    else
+      local KEY_FILE=$KEY_FILE_SEARCH
+    fi
+  else
+    dokku_log_fail "Tar archive containing server.crt and server.key expected on stdin"
+  fi
+
+  mkdir -p "$GLOBAL_SSL_PATH"
+  cp "$CRT_FILE" "$GLOBAL_SSL_PATH/server.crt"
+  cp "$KEY_FILE" "$GLOBAL_SSL_PATH/server.key"
+  chmod 750 "$GLOBAL_SSL_PATH"
+  chmod 640 "$GLOBAL_SSL_PATH/server.crt" "$GLOBAL_SSL_PATH/server.key"
+}
+
+cmd-global-cert-set "$@"

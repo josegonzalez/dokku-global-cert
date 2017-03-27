@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")" )" && pwd)/config"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+cmd-global-cert-generate() {
+  declare desc="generates a self-signed SSL certificate/key combo"
+  local cmd="$PLUGIN_COMMAND_PREFIX:generate"
+
+  if ! fn-is-ssl-enabled "$GLOBAL_SSL_PATH"; then
+    local CERTS_GENERATE_TMP_WORK_DIR=$(mktemp -d "/tmp/dokku_certs.XXXXXXXXX")
+    pushd "$CERTS_GENERATE_TMP_WORK_DIR" > /dev/null
+    trap 'popd &> /dev/null || true; rm -rf "$CERTS_GENERATE_TMP_WORK_DIR" > /dev/null' INT TERM EXIT
+
+    openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
+    openssl rsa -passin pass:x -in server.pass.key -out server.key
+    openssl req -new -key server.key -out server.csr
+    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+    mkdir -p "$GLOBAL_SSL_PATH"
+    dokku_log_info1 "Installing certificate and key..."
+    mv -f "$CERTS_GENERATE_TMP_WORK_DIR/server.crt" "$CERTS_GENERATE_TMP_WORK_DIR/server.csr" "$CERTS_GENERATE_TMP_WORK_DIR/server.key"  "$GLOBAL_SSL_PATH"
+    chmod 750 "$GLOBAL_SSL_PATH"
+    chmod 640 "$GLOBAL_SSL_PATH/server.crt" "$GLOBAL_SSL_PATH/server.csr" "$GLOBAL_SSL_PATH/server.key"
+    dokku_log_info1 "The following is a certificate signing request that can be used"
+    dokku_log_info1 "to generate an 'officially' signed SSL certificate"
+    dokku_log_info1 "by a CA of your choosing."
+    cat "$GLOBAL_SSL_PATH/server.csr"
+  else
+    dokku_log_info1 "Global SSL endpoint already defined"
+  fi
+}
+
+cmd-global-cert-generate "$@"

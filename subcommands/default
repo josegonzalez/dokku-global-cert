@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")" )" && pwd)/config"
+source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+cmd-global-cert-help "$PLUGIN_COMMAND_PREFIX:help"

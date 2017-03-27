@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")" )" && pwd)/config"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+cmd-global-cert-remove() {
+  declare desc="removes SSL cert/key from specified app"
+  local cmd="$PLUGIN_COMMAND_PREFIX:remove"
+
+  if fn-is-ssl-enabled "$GLOBAL_SSL_PATH"; then
+    dokku_log_info1 "Removing global SSL endpoint"
+    rm -rf "$GLOBAL_SSL_PATH/server.crt" "$GLOBAL_SSL_PATH/server.key"
+  else
+    dokku_log_fail "A global SSL endpoint is not defined"
+  fi
+}
+
+cmd-global-cert-remove "$@"

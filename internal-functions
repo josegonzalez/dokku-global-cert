@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+fn-is-ssl-enabled() {
+  declare desc="returns 0 if ssl is enabled for given app"
+  declare SSL_PATH="$1"
+
+  if [[ -e "$SSL_PATH/server.crt" ]] && [[ -e "$SSL_PATH/server.key" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+fn-get-ssl-hostnames() {
+  declare desc="returns a string of ssl hostnames extracted from an app's ssl certificate"
+  declare SSL_PATH="$1"
+  local SSL_HOSTNAME SSL_HOSTNAMES SSL_HOSTNAME_ALT
+
+  SSL_HOSTNAME=$(openssl x509 -in "$SSL_PATH/server.crt" -noout -subject | tr '/' '\n' | grep CN= | cut -c4-)
+  SSL_HOSTNAME_ALT=$(openssl x509 -in "$SSL_PATH/server.crt" -noout -text | grep --after-context=1 '509v3 Subject Alternative Name:' | tail -n 1 | sed -e "s/[[:space:]]*DNS://g"  | tr ',' '\n' || true)
+  if [[ -n "$SSL_HOSTNAME_ALT" ]]; then
+    SSL_HOSTNAMES="${SSL_HOSTNAME}\n${SSL_HOSTNAME_ALT}"
+  else
+    SSL_HOSTNAMES=$SSL_HOSTNAME
+  fi
+  echo -e "$SSL_HOSTNAMES" | sort -u
+  return 0
+}
+
+fn-is-file-import() {
+  declare desc="determines if we have passed in a file and key path for a file import"
+  local CRT_FILE="$1"
+  local KEY_FILE="$2"
+
+  if [[ "$CRT_FILE" ]] && [[ "$KEY_FILE" ]]; then
+    if [[ ! -f "$CRT_FILE" ]]; then
+      dokku_log_fail "CRT file specified not found, please check file paths"
+    elif [[ ! -f "$KEY_FILE" ]]; then
+      dokku_log_fail "KEY file specified not found, please check file paths"
+    else
+      return 0
+    fi
+  fi
+
+  return 1
+}
+fn-is-tar-import() {
+  declare desc="determines if we have STDIN open in an attempt to detect a streamed tar import"
+  [[ -t 0 ]] && return 1
+  return 0
+}
+
+fn-global-cert-help-content() {
+  declare desc="return ssh-keys plugin help content"
+  cat<<help_content
+    ${PLUGIN_COMMAND_PREFIX}, Alias for certs:help
+    ${PLUGIN_COMMAND_PREFIX}:set CRT KEY, Adds a global ssl endpoint. Can also import from a tarball on stdin
+    ${PLUGIN_COMMAND_PREFIX}:generate, Generate a key and certificate signing request (and self-signed certificate)
+    ${PLUGIN_COMMAND_PREFIX}:remove, Remove the SSL configuration
+    ${PLUGIN_COMMAND_PREFIX}:report [<flag>], Displays a global ssl report
+help_content
+}
+
+cmd-global-cert-help() {
+  if [[ $1 = "${PLUGIN_COMMAND_PREFIX}:help" ]] ; then
+    echo -e "Usage: dokku ${PLUGIN_COMMAND_PREFIX}[:COMMAND]"
+    echo ''
+    echo "Allows setting a global certificate for applications."
+    echo ''
+    echo 'Additional commands:'
+    fn-global-cert-help-content | sort | column -c2 -t -s,
+  elif [[ $(ps -o command= $PPID) == *"--all"* ]]; then
+    fn-global-cert-help-content
+  else
+    cat<<help_desc
+    ${PLUGIN_COMMAND_PREFIX}, Plugin for adding global certificates
+help_desc
+  fi
+}
