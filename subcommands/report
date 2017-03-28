@@ -59,7 +59,7 @@ fn-ssl-verified() {
 }
 
 global_report() {
-  declare INFO_FLAG="$2"
+  declare INFO_FLAG="$1"
   if [[ "$INFO_FLAG" == "true" ]]; then
     INFO_FLAG=""
   fi
