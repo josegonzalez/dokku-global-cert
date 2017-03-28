@@ -143,14 +143,14 @@ cmd-global-cert-report() {
   local flag flag_map key match valid_flags value_exists
 
   flag_map=(
-    "--global-ssl-dir: $PLUGIN_CONFIG_ROOT"
-    "--global-ssl-enabled: $(fn-ssl-enabled)"
-    "--global-ssl-expires-at: $(fn-ssl-expires-at)"
-    "--global-ssl-hostnames: $(fn-ssl-hostnames)"
-    "--global-ssl-issuer: $(fn-ssl-issuer)"
-    "--global-ssl-starts-at: $(fn-ssl-starts-at)"
-    "--global-ssl-subject: $(fn-ssl-subject)"
-    "--global-ssl-verified: $(fn-ssl-verified)"
+    "--global-cert-dir: $PLUGIN_CONFIG_ROOT"
+    "--global-cert-enabled: $(fn-ssl-enabled)"
+    "--global-cert-expires-at: $(fn-ssl-expires-at)"
+    "--global-cert-hostnames: $(fn-ssl-hostnames)"
+    "--global-cert-issuer: $(fn-ssl-issuer)"
+    "--global-cert-starts-at: $(fn-ssl-starts-at)"
+    "--global-cert-subject: $(fn-ssl-subject)"
+    "--global-cert-verified: $(fn-ssl-verified)"
   )
   if [[ -z "$INFO_FLAG" ]]; then
     dokku_log_info2_quiet "Global SSL Information"
