@@ -4,24 +4,23 @@ Allow setting a global certificate for dokku applications.
 
 ## requirements
 
-- dokku 0.5.0+
+- dokku 0.7.0+
 - docker 1.10.x
 
 ## installation
 
 ```shell
-# on 0.5.x
 dokku plugin:install https://github.com/josegonzalez/dokku-global-cert.git  global-cert
 ```
 
 ## commands
 
 ```shell
-global-cert                   # Alias for certs:help
-global-cert:generate          # Generate a key and certificate signing request (and self-signed certificate)
-global-cert:remove            # Remove the SSL configuration
-global-cert:report [<flag>]   # Displays a global ssl report
-global-cert:set CRT KEY       # Sets a global ssl endpoint. Can also import from a tarball on stdin
+global-cert                 # Alias for certs:help
+global-cert:generate        # Generate a key and certificate signing request (and self-signed certificate)
+global-cert:remove          # Remove the SSL configuration
+global-cert:report [<flag>] # Displays a global ssl report
+global-cert:set CRT KEY     # Sets a global ssl endpoint. Can also import from a tarball on stdin
 ```
 
 ## usage
