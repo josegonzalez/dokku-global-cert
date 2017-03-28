@@ -16,7 +16,6 @@ dokku plugin:install https://github.com/josegonzalez/dokku-global-cert.git globa
 ## commands
 
 ```shell
-global-cert                 # Alias for certs:help
 global-cert:generate        # Generate a key and certificate signing request (and self-signed certificate)
 global-cert:remove          # Remove the SSL configuration
 global-cert:report [<flag>] # Displays a global ssl report
