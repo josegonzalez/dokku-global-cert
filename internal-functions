@@ -54,8 +54,62 @@ fn-is-tar-import() {
   return 0
 }
 
+fn-ssl-enabled() {
+  local SSL_ENABLED=false
+
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    SSL_ENABLED=true
+  fi
+  echo "$SSL_ENABLED" 
+}
+
+fn-ssl-expires-at() {
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -text | grep "Not After :" | awk -F " : " '{ print $2 }'
+  fi
+}
+
+fn-ssl-hostnames() {
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    fn-get-ssl-hostnames "$PLUGIN_CONFIG_ROOT" | xargs
+  fi
+}
+
+fn-ssl-issuer() {
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -text | grep "Issuer:" | xargs | sed -e "s/Issuer: //g"
+  fi
+}
+
+fn-ssl-starts-at() {
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -text | grep "Not Before:" | awk -F ": " '{ print $2 }'
+  fi
+}
+
+fn-ssl-subject() {
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -subject | sed -e "s:subject= ::g"| sed -e "s:^/::g" | sed -e "s:/:; :g"
+  fi
+}
+
+fn-ssl-verified() {
+  local SSL_VERIFY_OUTPUT=false SSL_SELF_SIGNED="self signed"
+
+  if ! fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    return
+  fi
+
+  SSL_VERIFY_OUTPUT="$(openssl verify -verbose -purpose sslserver "$PLUGIN_CONFIG_ROOT/server.crt" | awk -F ':' '{ print $2 }' | tail -1 | xargs || true)"
+  if [[ "$SSL_VERIFY_OUTPUT" == "OK" ]]; then
+    SSL_SELF_SIGNED="verified by a certificate authority"
+  fi
+
+  echo "$SSL_SELF_SIGNED"
+}
+
 fn-global-cert-help-content() {
-  declare desc="return ssh-keys plugin help content"
+  declare desc="return $PLUGIN_COMMAND_PREFIX plugin help content"
   cat<<help_content
     ${PLUGIN_COMMAND_PREFIX}, Alias for certs:help
     ${PLUGIN_COMMAND_PREFIX}:set CRT KEY, Adds a global ssl endpoint. Can also import from a tarball on stdin
@@ -67,9 +121,9 @@ help_content
 
 cmd-global-cert-help() {
   if [[ $1 = "${PLUGIN_COMMAND_PREFIX}:help" ]] ; then
-    echo -e "Usage: dokku ${PLUGIN_COMMAND_PREFIX}[:COMMAND]"
+    echo -e "Usage: dokku $PLUGIN_COMMAND_PREFIX[:COMMAND] <app>"
     echo ''
-    echo "Allows setting a global certificate for applications."
+    echo 'Manages a global certificate for Dokku.'
     echo ''
     echo 'Additional commands:'
     fn-global-cert-help-content | sort | column -c2 -t -s,
@@ -77,7 +131,48 @@ cmd-global-cert-help() {
     fn-global-cert-help-content
   else
     cat<<help_desc
-    ${PLUGIN_COMMAND_PREFIX}, Plugin for adding global certificates
+    ${PLUGIN_COMMAND_PREFIX}, Manages a global certificate for Dokku
 help_desc
+  fi
+}
+
+cmd-global-cert-report() {
+  declare desc="Display the configured consul registration status for an application"
+  declare cmd="$PLUGIN_COMMAND_PREFIX:report" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare INFO_FLAG="$1"
+  local flag flag_map key match valid_flags value_exists
+
+  flag_map=(
+    "--global-ssl-dir: $PLUGIN_CONFIG_ROOT"
+    "--global-ssl-enabled: $(fn-ssl-enabled)"
+    "--global-ssl-expires-at: $(fn-ssl-expires-at)"
+    "--global-ssl-hostnames: $(fn-ssl-hostnames)"
+    "--global-ssl-issuer: $(fn-ssl-issuer)"
+    "--global-ssl-starts-at: $(fn-ssl-starts-at)"
+    "--global-ssl-subject: $(fn-ssl-subject)"
+    "--global-ssl-verified: $(fn-ssl-verified)"
+  )
+  if [[ -z "$INFO_FLAG" ]]; then
+    dokku_log_info2_quiet "Global SSL Information"
+    for flag in "${flag_map[@]}"; do
+      key="$(echo "${flag#--}" | cut -f1 -d' ' | tr - ' ')"
+      dokku_log_verbose "$(printf "%-20s %-25s" "${key^}" "${flag#*: }")"
+    done
+  else
+    match=false
+    value_exists=false
+    for flag in "${flag_map[@]}"; do
+      valid_flags="${valid_flags} $(echo "$flag" | cut -d':' -f1)"
+      if [[ "$flag" == "${INFO_FLAG}:"* ]]; then
+        value=${flag#*: }
+        size="${#value}"
+        if [[ "$size" -ne 0 ]]; then
+          echo "$value" && match=true && value_exists=true
+        else
+          match=true
+        fi
+      fi
+    done
+    [[ "$match" == "true" ]] || dokku_log_fail "Invalid flag passed, valid flags:${valid_flags}"
   fi
 }

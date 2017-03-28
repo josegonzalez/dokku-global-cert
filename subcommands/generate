@@ -8,7 +8,7 @@ cmd-global-cert-generate() {
   declare desc="generates a self-signed SSL certificate/key combo"
   local cmd="$PLUGIN_COMMAND_PREFIX:generate"
 
-  if ! fn-is-ssl-enabled "$GLOBAL_SSL_PATH"; then
+  if ! fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
     local CERTS_GENERATE_TMP_WORK_DIR=$(mktemp -d "/tmp/dokku_certs.XXXXXXXXX")
     pushd "$CERTS_GENERATE_TMP_WORK_DIR" > /dev/null
     trap 'popd &> /dev/null || true; rm -rf "$CERTS_GENERATE_TMP_WORK_DIR" > /dev/null' INT TERM EXIT
@@ -18,15 +18,15 @@ cmd-global-cert-generate() {
     openssl req -new -key server.key -out server.csr
     openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
-    mkdir -p "$GLOBAL_SSL_PATH"
+    mkdir -p "$PLUGIN_CONFIG_ROOT"
     dokku_log_info1 "Installing certificate and key..."
-    mv -f "$CERTS_GENERATE_TMP_WORK_DIR/server.crt" "$CERTS_GENERATE_TMP_WORK_DIR/server.csr" "$CERTS_GENERATE_TMP_WORK_DIR/server.key"  "$GLOBAL_SSL_PATH"
-    chmod 750 "$GLOBAL_SSL_PATH"
-    chmod 640 "$GLOBAL_SSL_PATH/server.crt" "$GLOBAL_SSL_PATH/server.csr" "$GLOBAL_SSL_PATH/server.key"
+    mv -f "$CERTS_GENERATE_TMP_WORK_DIR/server.crt" "$CERTS_GENERATE_TMP_WORK_DIR/server.csr" "$CERTS_GENERATE_TMP_WORK_DIR/server.key"  "$PLUGIN_CONFIG_ROOT"
+    chmod 750 "$PLUGIN_CONFIG_ROOT"
+    chmod 640 "$PLUGIN_CONFIG_ROOT/server.crt" "$PLUGIN_CONFIG_ROOT/server.csr" "$PLUGIN_CONFIG_ROOT/server.key"
     dokku_log_info1 "The following is a certificate signing request that can be used"
     dokku_log_info1 "to generate an 'officially' signed SSL certificate"
     dokku_log_info1 "by a CA of your choosing."
-    cat "$GLOBAL_SSL_PATH/server.csr"
+    cat "$PLUGIN_CONFIG_ROOT/server.csr"
   else
     dokku_log_info1 "Global SSL endpoint already defined"
   fi

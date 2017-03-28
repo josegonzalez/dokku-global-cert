@@ -8,9 +8,9 @@ cmd-global-cert-remove() {
   declare desc="removes SSL cert/key from specified app"
   local cmd="$PLUGIN_COMMAND_PREFIX:remove"
 
-  if fn-is-ssl-enabled "$GLOBAL_SSL_PATH"; then
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
     dokku_log_info1 "Removing global SSL endpoint"
-    rm -rf "$GLOBAL_SSL_PATH/server.crt" "$GLOBAL_SSL_PATH/server.key"
+    rm -rf "$PLUGIN_CONFIG_ROOT/server.crt" "$PLUGIN_CONFIG_ROOT/server.key"
   else
     dokku_log_fail "A global SSL endpoint is not defined"
   fi

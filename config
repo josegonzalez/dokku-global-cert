@@ -4,4 +4,4 @@ export PLUGIN_BASE_PATH="$PLUGIN_PATH"
 if [[ -n $DOKKU_API_VERSION ]]; then
   export PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
 fi
-export GLOBAL_SSL_PATH="$DOKKU_LIB_ROOT/config/global-cert"
+export PLUGIN_CONFIG_ROOT="$DOKKU_LIB_ROOT/config/global-cert"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+global-cert-uninstall() {
+  declare PLUGIN="$1"
+  if [[ "$PLUGIN" != "$PLUGIN_COMMAND_PREFIX" ]]; then
+    return
+  fi
+
+  rm -rf "${PLUGIN_CONFIG_ROOT:?}"
+}
+
+global-cert-uninstall "$@"

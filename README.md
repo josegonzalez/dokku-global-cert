@@ -1,16 +1,16 @@
 # dokku-global-cert [![Build Status](https://travis-ci.org/josegonzalez/dokku-global-cert.svg?branch=master)](https://travis-ci.org/josegonzalez/dokku-global-cert)
 
-Allow setting a global certificate for dokku applications.
+Manages a global certificate for dokku.
 
 ## requirements
 
 - dokku 0.7.0+
-- docker 1.10.x
+- docker 1.12.x
 
 ## installation
 
 ```shell
-dokku plugin:install https://github.com/josegonzalez/dokku-global-cert.git  global-cert
+dokku plugin:install https://github.com/josegonzalez/dokku-global-cert.git global-cert
 ```
 
 ## commands

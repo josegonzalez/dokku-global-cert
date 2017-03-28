@@ -1,4 +1,4 @@
 [plugin]
-description = "dokku plugin that allows setting a global certificate for applications"
+description = "manages a global certificate for dokku"
 version = "0.2.0"
 [plugin.config]
