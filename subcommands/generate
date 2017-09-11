@@ -4,7 +4,9 @@ source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
 source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-cmd-global-cert-generate() {
+global-cert-generate-cmd() {
+  #E generate a self-signed global SSL certificate
+  #E dokku $PLUGIN_COMMAND_PREFIX:generate
   declare desc="generates a self-signed SSL certificate/key combo"
   local cmd="$PLUGIN_COMMAND_PREFIX:generate"
 
@@ -32,4 +34,4 @@ cmd-global-cert-generate() {
   fi
 }
 
-cmd-global-cert-generate "$@"
+global-cert-generate-cmd "$@"

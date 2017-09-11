@@ -119,23 +119,6 @@ fn-global-cert-help-content() {
 help_content
 }
 
-cmd-global-cert-help() {
-  if [[ $1 = "${PLUGIN_COMMAND_PREFIX}:help" ]] ; then
-    echo -e "Usage: dokku $PLUGIN_COMMAND_PREFIX[:COMMAND] <app>"
-    echo ''
-    echo 'Manages a global certificate for Dokku.'
-    echo ''
-    echo 'Additional commands:'
-    fn-global-cert-help-content | sort | column -c2 -t -s,
-  elif [[ $(ps -o command= $PPID) == *"--all"* ]]; then
-    fn-global-cert-help-content
-  else
-    cat<<help_desc
-    ${PLUGIN_COMMAND_PREFIX}, Manages a global certificate for Dokku
-help_desc
-  fi
-}
-
 cmd-global-cert-report() {
   declare desc="Display the configured consul registration status for an application"
   declare cmd="$PLUGIN_COMMAND_PREFIX:report" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1

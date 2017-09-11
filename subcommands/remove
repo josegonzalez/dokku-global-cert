@@ -4,8 +4,10 @@ source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
 source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-cmd-global-cert-remove() {
-  declare desc="removes SSL cert/key from specified app"
+global-cert-remove-cmd() {
+  #E remove the global SSL certificate
+  #E dokku $PLUGIN_COMMAND_PREFIX:remove
+  declare desc="removes the global SSL cert/key"
   local cmd="$PLUGIN_COMMAND_PREFIX:remove"
 
   if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
@@ -16,4 +18,4 @@ cmd-global-cert-remove() {
   fi
 }
 
-cmd-global-cert-remove "$@"
+global-cert-remove-cmd "$@"

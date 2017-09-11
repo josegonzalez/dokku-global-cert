@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 [[ " help $PLUGIN_COMMAND_PREFIX:help " == *" $1 "* ]] || [[ "$1" == "$PLUGIN_COMMAND_PREFIX:"* ]] || exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
-source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
-source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-case "$1" in
-  help | $PLUGIN_COMMAND_PREFIX:help)
-    cmd-global-cert-help "$@"
-    ;;
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/help-functions"
 
-  *)
-    exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
-    ;;
-esac
+fn-help "$@"

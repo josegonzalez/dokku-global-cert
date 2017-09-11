@@ -2,4 +2,22 @@
 source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-cmd-global-cert-report "$@"
+global-cert-report-cmd() {
+  #E get a report on the global certificate configuration
+  #E dokku $PLUGIN_COMMAND_PREFIX:report
+  #F --global-cert-dir,
+  #F --global-cert-enabled,
+  #F --global-cert-expires-at,
+  #F --global-cert-hostnames,
+  #F --global-cert-issuer,
+  #F --global-cert-starts-at,
+  #F --global-cert-subject,
+  #F --global-cert-verified,
+  declare desc="display the configured global-cert status for an application"
+  local cmd="$PLUGIN_COMMAND_PREFIX:report" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare INFO_FLAG="$1"
+
+  cmd-global-cert-report "$@"
+}
+
+global-cert-report-cmd "$@"
