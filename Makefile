@@ -26,7 +26,7 @@ lint:
 	# SC1090: Can't follow non-constant source. Use a directive to specify location. - https://github.com/koalaman/shellcheck/wiki/SC1090
 	# SC2155: Declare and assign separately to avoid masking return values. - https://github.com/koalaman/shellcheck/wiki/SC2155
 	@echo linting...
-	@$(QUIET) find ./ -maxdepth 1 -not -path '*/\.*' | xargs file | egrep "shell|bash" | awk '{ print $$1 }' | sed 's/://g' | xargs shellcheck -e SC1090,SC2034
+	@$(QUIET) find ./ -maxdepth 1 -not -path '*/\.*' | xargs file | egrep "shell|bash" | awk '{ print $$1 }' | sed 's/://g' | xargs shellcheck -e SC1090,SC2034,SC2155
 
 setup:
 	$(MAKE) ci-dependencies
