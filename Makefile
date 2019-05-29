@@ -25,8 +25,9 @@ lint:
 	# SC2034: foo appears unused. Verify it or export it. - https://github.com/koalaman/shellcheck/wiki/SC2034
 	# SC1090: Can't follow non-constant source. Use a directive to specify location. - https://github.com/koalaman/shellcheck/wiki/SC1090
 	# SC2155: Declare and assign separately to avoid masking return values. - https://github.com/koalaman/shellcheck/wiki/SC2155
+	# SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting). - https://github.com/koalaman/shellcheck/wiki/SC2207
 	@echo linting...
-	@$(QUIET) find ./ -maxdepth 1 -not -path '*/\.*' | xargs file | egrep "shell|bash" | awk '{ print $$1 }' | sed 's/://g' | xargs shellcheck -e SC1090,SC2034,SC2155
+	@$(QUIET) find ./ -maxdepth 1 -not -path '*/\.*' | xargs file | egrep "shell|bash" | awk '{ print $$1 }' | sed 's/://g' | xargs shellcheck -e SC1090,SC2034,SC2155,SC2207
 
 setup:
 	$(MAKE) ci-dependencies
