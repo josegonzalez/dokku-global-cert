@@ -56,7 +56,7 @@ fn-help-all() {
       return "$?"
     fi
 
-    echo -e "${BOLD}usage${NORMAL}: dokku $PLUGIN_COMMAND_PREFIX[:COMMAND]"
+    echo -e "${BOLD}usage${NORMAL}: dokku ${PLUGIN_COMMAND_PREFIX}[:COMMAND]"
     echo ''
     echo -e "dokku ${BOLD}${PLUGIN_COMMAND_PREFIX}${NORMAL} commands: (get help with ${CYAN}dokku ${PLUGIN_COMMAND_PREFIX}:help SUBCOMMAND${NORMAL})"
     echo ''
