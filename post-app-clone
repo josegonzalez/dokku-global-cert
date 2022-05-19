@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$PLUGIN_AVAILABLE_PATH/global-cert/internal-functions"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+hook-post-app-clone-global-cert() {
+  declare desc="sets global certs for an app"
+  local APP="$2"
+  [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+  local CRT_FILE="$PLUGIN_CONFIG_ROOT/server.crt"
+  local KEY_FILE="$PLUGIN_CONFIG_ROOT/server.key"
+
+  if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
+    # we should export certs_set as a function in the certs plugin so that this works with the remote cli...
+    dokku certs:add "$APP" "$CRT_FILE" "$KEY_FILE"
+  fi
+}
+
+hook-post-app-clone-global-cert "$@"
