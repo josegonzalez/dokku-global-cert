@@ -10,10 +10,15 @@ hook-post-create-global-cert() {
   [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
   local CRT_FILE="$PLUGIN_CONFIG_ROOT/server.crt"
   local KEY_FILE="$PLUGIN_CONFIG_ROOT/server.key"
+  # todo get from platform
+  local APP_SSL_PATH="$DOKKU_ROOT/$APP/tls"
 
   if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
-    # we should export certs_set as a function in the certs plugin so that this works with the remote cli...
-    dokku certs:add "$APP" "$CRT_FILE" "$KEY_FILE"
+    # we symlink the global cert to the newly created app
+    # this ensures that if the global cert (gc) is updated the apps, that still use the gc, have the latest gc
+    mkdir -p "$APP_SSL_PATH"
+    ln -s "$CRT_FILE" "$APP_SSL_PATH/server.crt"
+    ln -s "$KEY_FILE" "$APP_SSL_PATH/server.key"
   fi
 }
 
