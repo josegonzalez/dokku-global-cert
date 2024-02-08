@@ -77,7 +77,7 @@ fn-ssl-hostnames() {
 
 fn-ssl-issuer() {
   if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
-    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -text | grep "Issuer:" | xargs | sed -e "s/Issuer: //g"
+    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -text | grep "Issuer:" | head -n1 | sed -e 's/Issuer: //g' -e 's/^[[:space:]]*//'
   fi
 }
 
@@ -89,7 +89,7 @@ fn-ssl-starts-at() {
 
 fn-ssl-subject() {
   if fn-is-ssl-enabled "$PLUGIN_CONFIG_ROOT"; then
-    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -subject | sed -e "s:subject= ::g"| sed -e "s:^/::g" | sed -e "s:/:; :g"
+    openssl x509 -in "$PLUGIN_CONFIG_ROOT/server.crt" -noout -subject | sed -e "s:subject= ::g" | sed -e "s:^/::g" | sed -e "s:/:; :g"
   fi
 }
 
@@ -100,7 +100,7 @@ fn-ssl-verified() {
     return
   fi
 
-  SSL_VERIFY_OUTPUT="$(openssl verify -verbose -purpose sslserver "$PLUGIN_CONFIG_ROOT/server.crt" | awk -F ':' '{ print $2 }' | tail -1 | xargs || true)"
+  SSL_VERIFY_OUTPUT="$(openssl verify -verbose -purpose sslserver "$PLUGIN_CONFIG_ROOT/server.crt" 2>/dev/null | awk -F ':' '{ print $2 }' | tail -1 | xargs || true)"
   if [[ "$SSL_VERIFY_OUTPUT" == "OK" ]]; then
     SSL_SELF_SIGNED="verified by a certificate authority"
   fi
